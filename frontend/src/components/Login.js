@@ -74,6 +74,12 @@ const StyledLink = styled.p`
   }
 `;
 
+const SuccessMessage = styled.p`
+  color: green;
+  text-align: center;
+  margin-top: 10px;
+`;
+
 const ErrorMessage = styled.p`
   color: red;
   text-align: center;
@@ -83,11 +89,13 @@ const ErrorMessage = styled.p`
 const Login = ({ setUserId }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setSuccess('');
     setError('');
 
     try {
@@ -97,7 +105,10 @@ const Login = ({ setUserId }) => {
       });
       const user = response.data.user;
       setUserId(user._id); // Salva o ID do usuário no estado global
-      navigate('/reports');
+      setSuccess('Login realizado com sucesso!');
+      setTimeout(() => {
+        navigate('/reports'); // Redireciona após 2 segundos
+      }, 2000);
     } catch (error) {
       setError('Credenciais inválidas!');
     }
@@ -124,6 +135,7 @@ const Login = ({ setUserId }) => {
             required
           />
           <Button type="submit">Login</Button>
+          {success && <SuccessMessage>{success}</SuccessMessage>}
           {error && <ErrorMessage>{error}</ErrorMessage>}
         </Form>
         <StyledLink onClick={() => navigate('/register')}>
