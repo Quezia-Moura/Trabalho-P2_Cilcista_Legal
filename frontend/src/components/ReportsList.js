@@ -121,6 +121,7 @@ const ReportsList = ({ userId }) => {
     const fetchReports = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/reports/${userId}`);
+        console.log('Reports recebidos:', response.data);  // Verifique se os dados são os esperados
         const sortedReports = response.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
@@ -129,9 +130,10 @@ const ReportsList = ({ userId }) => {
         alert('Erro ao carregar denúncias.');
       }
     };
-
+  
     fetchReports();
   }, [userId]);
+  
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -152,7 +154,7 @@ const ReportsList = ({ userId }) => {
   const deleteReport = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/reports/${id}`);
-      setReports(reports.filter((report) => report.id !== id));
+      setReports(reports.filter((report) => report._id !== id));
     } catch (error) {
       alert('Erro ao excluir denúncia.');
     }
@@ -164,31 +166,28 @@ const ReportsList = ({ userId }) => {
         <TitleWrapper>
           <Title>Ciclista Legal</Title>
           <ButtonsWrapper>
-            <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+            <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
           </ButtonsWrapper>
         </TitleWrapper>
 
         <SubtitleWrapper>
-          <Subtitle>Lista de Denúncias</Subtitle>
+          <Subtitle>Suas Denúncias</Subtitle>
           <CreateButton onClick={handleCreateReport}>Criar Denúncia</CreateButton>
         </SubtitleWrapper>
 
         {reports.length === 0 ? (
-          <NoReportsMessage>Nenhuma denúncia encontrada.</NoReportsMessage>
+          <NoReportsMessage>Você ainda não fez nenhuma denúncia.</NoReportsMessage>
         ) : (
           reports.map((report) => (
-            <ReportItem key={report.id}>
-              <p>
-                <strong>Descrição:</strong> {report.description}
-              </p>
-              <p>
-                <strong>Criado em:</strong> {new Date(report.createdAt).toLocaleString()}
-              </p>
-              {canDelete(report.createdAt) ? (
-                <DeleteButton onClick={() => deleteReport(report.id)}>Excluir</DeleteButton>
-              ) : (
-                <ExpirationText>Prazo para exclusão expirado.</ExpirationText>
+            <ReportItem key={report._id}>
+              <p><strong>Tipo de Infração:</strong> {report.infractionType}</p>
+              <p><strong>Localização:</strong> {report.location}</p>
+              <p><strong>Descrição:</strong> {report.description}</p>
+              <p><strong>Criado em:</strong> {new Date(report.createdAt).toLocaleString()}</p>
+              {canDelete(report.createdAt) && (
+                <DeleteButton onClick={() => deleteReport(report._id)}>Excluir</DeleteButton>
               )}
+              {!canDelete(report.createdAt) && <ExpirationText>Essa denúncia não pode mais ser excluída.</ExpirationText>}
             </ReportItem>
           ))
         )}
